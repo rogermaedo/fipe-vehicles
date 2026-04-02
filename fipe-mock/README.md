@@ -11,7 +11,11 @@ O serviço oficial da FIPE (`https://parallelum.com.br/fipe/api/v1`, referência
 | `GET` | `/carros/marcas` | Array de `{ "codigo": string, "nome": string }` |
 | `GET` | `/carros/marcas/{codigoMarca}/modelos` | `{ "modelos": [ { "codigo": number, "nome": string }, ... ], "anos": [] }` |
 
-Os corpos vêm dos ficheiros em `src/main/resources/fipe-contract/` (`marcas.json`, `modelos-response.json`). Podes editá-los para cenários locais.
+Os corpos vêm dos arquivos em `src/main/resources/fipe-contract/` (`marcas.json`, `modelos-response.json`). Você pode editá-los para cenários locais.
+
+## Docker (stack completa)
+
+O repositório inclui um `Dockerfile` neste módulo. Para subir **Postgres, RabbitMQ, fipe-mock, api-1 e api-2** de uma vez, use o **`docker-compose.yml` na raiz do repositório** (veja o [`README.md`](../README.md) na raiz).
 
 ## Pré-requisitos
 

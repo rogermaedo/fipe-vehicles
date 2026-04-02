@@ -1,0 +1,108 @@
+# Stack completa: Postgres (SQL inicial), RabbitMQ, fipe-mock, api-1, api-2
+# Na raiz do repositório:
+#   docker compose up -d --build
+#
+# Primeira vez: build Maven dentro do Docker — pode demorar vários minutos.
+# SQL em infra/sql/*.sql aplica-se só na primeira criação do volume postgres_stack_data.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fv-postgres
+    environment:
+      POSTGRES_USER: vehicle
+      POSTGRES_PASSWORD: vehicle
+      POSTGRES_DB: vehicle
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_stack_data:/var/lib/postgresql/data
+      - ./infra/sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vehicle -d vehicle"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: fv-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: vehicle
+      RABBITMQ_DEFAULT_PASS: vehicle
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_stack_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 35s
+
+  fipe-mock:
+    build:
+      context: ./fipe-mock
+      dockerfile: Dockerfile
+    container_name: fv-fipe-mock
+    ports:
+      - "8090:8090"
+    environment:
+      FIPE_MOCK_PORT: "8090"
+
+  api-1:
+    build:
+      context: ./api-1
+      dockerfile: Dockerfile
+    container_name: fv-api-1
+    ports:
+      - "8080:8080"
+    environment:
+      QUARKUS_HTTP_PORT: "8080"
+      JDBC_URL: jdbc:postgresql://postgres:5432/vehicle
+      DB_USER: vehicle
+      DB_PASSWORD: vehicle
+      FIPE_API_BASE_URL: http://fipe-mock:8090
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USER: vehicle
+      RABBITMQ_PASS: vehicle
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      fipe-mock:
+        condition: service_started
+
+  api-2:
+    build:
+      context: ./api-2
+      dockerfile: Dockerfile
+    container_name: fv-api-2
+    ports:
+      - "8081:8081"
+    environment:
+      QUARKUS_HTTP_PORT: "8081"
+      JDBC_URL: jdbc:postgresql://postgres:5432/vehicle
+      DB_USER: vehicle
+      DB_PASSWORD: vehicle
+      FIPE_API_BASE_URL: http://fipe-mock:8090
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USER: vehicle
+      RABBITMQ_PASS: vehicle
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      fipe-mock:
+        condition: service_started
+
+volumes:
+  postgres_stack_data:
+  rabbitmq_stack_data:
