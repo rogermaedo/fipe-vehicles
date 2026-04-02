@@ -1,0 +1,280 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "fipeapi",
+    "description": "API para consulta de valores de veículos na Tabela FIPE",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://parallelum.com.br/fipe/api/v1",
+      "description": "Servidor principal da API FIPE"
+    }
+  ],
+  "paths": {
+    "/carros/marcas": {
+      "get": {
+        "summary": "consulta marcas",
+        "description": "Lista todas as marcas de carros disponíveis na tabela FIPE",
+        "operationId": "consultaMarcas",
+        "responses": {
+          "200": {
+            "description": "Lista de marcas retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Marca"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carros/marcas/{codigoMarca}/modelos": {
+      "get": {
+        "summary": "consulta modelos por marca",
+        "description": "Retorna os modelos de veículos para uma marca específica",
+        "operationId": "consultaModelosPorMarca",
+        "parameters": [
+          {
+            "name": "codigoMarca",
+            "in": "path",
+            "required": true,
+            "description": "Código da marca",
+            "schema": {
+              "type": "string",
+              "example": "195"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de modelos retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carros/marcas/{codigoMarca}/modelos/{codigoModelo}/anos": {
+      "get": {
+        "summary": "consulta marca modelo por ano",
+        "description": "Retorna os anos disponíveis para um modelo específico de uma marca",
+        "operationId": "consultaMarcaModeloPorAno",
+        "parameters": [
+          {
+            "name": "codigoMarca",
+            "in": "path",
+            "required": true,
+            "description": "Código da marca",
+            "schema": {
+              "type": "string",
+              "example": "59"
+            }
+          },
+          {
+            "name": "codigoModelo",
+            "in": "path",
+            "required": true,
+            "description": "Código do modelo",
+            "schema": {
+              "type": "string",
+              "example": "5940"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de anos disponíveis retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Ano"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carros/marcas/{codigoMarca}/modelos/{codigoModelo}/anos/{ano}": {
+      "get": {
+        "summary": "consulta valor por marca modelo e ano",
+        "description": "Retorna o valor FIPE de um veículo para uma marca, modelo e ano específicos",
+        "operationId": "consultaValorPorMarcaModeloEAno",
+        "parameters": [
+          {
+            "name": "codigoMarca",
+            "in": "path",
+            "required": true,
+            "description": "Código da marca",
+            "schema": {
+              "type": "string",
+              "example": "59"
+            }
+          },
+          {
+            "name": "codigoModelo",
+            "in": "path",
+            "required": true,
+            "description": "Código do modelo",
+            "schema": {
+              "type": "string",
+              "example": "5940"
+            }
+          },
+          {
+            "name": "ano",
+            "in": "path",
+            "required": true,
+            "description": "Ano do modelo no formato YYYY-N",
+            "schema": {
+              "type": "string",
+              "example": "2014-3"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Valor FIPE do veículo retornado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValorFipe"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Marca": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "description": "Código identificador da marca",
+            "example": "59"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da marca",
+            "example": "Toyota"
+          }
+        }
+      },
+      "Modelo": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "integer",
+            "description": "Código identificador do modelo",
+            "example": 5940
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome do modelo",
+            "example": "Corolla"
+          }
+        }
+      },
+      "ModelosResponse": {
+        "type": "object",
+        "properties": {
+          "modelos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Modelo"
+            }
+          },
+          "anos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Ano"
+            }
+          }
+        }
+      },
+      "Ano": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "description": "Código do ano no formato YYYY-N",
+            "example": "2014-3"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Descrição do ano",
+            "example": "2014 Diesel"
+          }
+        }
+      },
+      "ValorFipe": {
+        "type": "object",
+        "properties": {
+          "TipoVeiculo": {
+            "type": "integer",
+            "description": "Tipo do veículo",
+            "example": 1
+          },
+          "Valor": {
+            "type": "string",
+            "description": "Valor do veículo na tabela FIPE",
+            "example": "R$ 85.000,00"
+          },
+          "Marca": {
+            "type": "string",
+            "description": "Nome da marca",
+            "example": "Toyota"
+          },
+          "Modelo": {
+            "type": "string",
+            "description": "Nome do modelo",
+            "example": "Corolla"
+          },
+          "AnoModelo": {
+            "type": "integer",
+            "description": "Ano do modelo",
+            "example": 2014
+          },
+          "Combustivel": {
+            "type": "string",
+            "description": "Tipo de combustível",
+            "example": "Diesel"
+          },
+          "CodigoFipe": {
+            "type": "string",
+            "description": "Código FIPE do veículo",
+            "example": "005340-6"
+          },
+          "MesReferencia": {
+            "type": "string",
+            "description": "Mês de referência da tabela FIPE",
+            "example": "dezembro de 2023"
+          },
+          "SiglaCombustivel": {
+            "type": "string",
+            "description": "Sigla do tipo de combustível",
+            "example": "D"
+          }
+        }
+      }
+    }
+  }
+}

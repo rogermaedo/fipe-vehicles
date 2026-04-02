@@ -1,0 +1,13 @@
+{
+  "modelos": [
+    {
+      "codigo": 5940,
+      "nome": "Corolla"
+    },
+    {
+      "codigo": 5941,
+      "nome": "Modelo mock B"
+    }
+  ],
+  "anos": []
+}

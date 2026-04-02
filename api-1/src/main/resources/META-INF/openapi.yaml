@@ -1,0 +1,305 @@
+openapi: 3.0.3
+info:
+  title: Vehicle API (api-1)
+  description: |
+    REST API para orquestrar carga FIPE (via fila → api-2) e leitura/atualização de marcas e veículos
+    persistidos no banco.
+
+    **HTTP `202` na carga inicial:** a parte síncrona (consulta FIPE de marcas + publicação de uma
+    mensagem por marca na fila) é *aceita* para processamento assíncrono na api-2. O cliente não deve
+    assumir veículos já persistidos — apenas que o enfileiramento concluiu.
+
+    **Identidade de veículo na API:** o recurso é sempre endereçado por **`id`**. O **código** do modelo
+    (item do exame) corresponde a `fipeModelCode` (= `Modelo.codigo` na FIPE). **Não** substitui `id` nas URLs.
+
+    **PATCH `modelName` / `notes`:** atualização **in-place** na linha identificada por `id` (sem criar
+    nova linha por renomeação de modelo). Pelo menos um dos campos no corpo é obrigatório.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local (Quarkus default)
+
+tags:
+  - name: ingest
+    description: Dispara carga assíncrona de marcas/modelos via fila.
+  - name: brands
+    description: Marcas persistidas.
+  - name: vehicles
+    description: "Veículos (modelo FIPE + observações), sempre identificados por id na URL."
+
+paths:
+  /api/v1/initial-load:
+    post:
+      tags: [ingest]
+      summary: Disparar carga inicial (marcas → fila)
+      description: |
+        Consulta `GET …/carros/marcas` na API FIPE e publica **uma mensagem por marca** na fila para
+        a api-2. Este endpoint apenas enfileira; a persistência de modelos ocorre de forma assíncrona.
+        Em caso de sucesso, retorna `202 Accepted` com resumo.
+      operationId: triggerInitialLoad
+      responses:
+        "202":
+          description: Marcas obtidas e aceitas na fila; processamento continua na api-2.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitialLoadAcceptedResponse"
+        "400":
+          description: Requisição inválida (quando aplicável).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Falha na API FIPE ou dependência antes de concluir o enfileiramento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Indisponibilidade do broker ou falha transitória antes do enfileiramento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro inesperado no servidor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/brands:
+    get:
+      tags: [brands]
+      summary: Listar marcas armazenadas
+      operationId: listBrands
+      responses:
+        "200":
+          description: Todas as marcas no banco.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BrandResponse"
+        "500":
+          description: Erro inesperado no servidor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/brands/{brandId}/vehicles:
+    get:
+      tags: [brands, vehicles]
+      summary: Listar veículos por marca
+      description: |
+        Retorna códigos (`fipeModelCode`), modelos (`modelName`) e observações (`notes`) dos veículos da marca.
+      operationId: listVehiclesByBrand
+      parameters:
+        - name: brandId
+          in: path
+          required: true
+          description: "Chave primária da marca (brand.id)."
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Veículos da marca.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VehicleResponse"
+        "404":
+          description: Marca não encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro inesperado no servidor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/vehicles/{id}:
+    get:
+      tags: [vehicles]
+      summary: Obter veículo por id
+      description: |
+        `id` é a chave primária numérica (`vehicle.id`); não há busca por string negocial.
+      operationId: getVehicleById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Chave primária do veículo (vehicle.id)."
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Veículo encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleResponse"
+        "404":
+          description: "Nenhum veículo com este id."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro inesperado no servidor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      tags: [vehicles]
+      summary: Atualizar veículo (parcial)
+      description: |
+        Corpo: apenas `modelName` e/ou `notes`; **pelo menos um** campo deve estar presente.
+
+        A atualização é **na mesma linha** identificada por `id` (sem criar novo registro por mudança
+        de nome). O corpo de resposta reflete o estado após a operação.
+      operationId: patchVehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Chave primária do veículo (vehicle.id)."
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VehiclePatchRequest"
+      responses:
+        "200":
+          description: Atualização aplicada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleResponse"
+        "400":
+          description: Validação (corpo vazio, sem campos, valores inválidos).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "ID de veículo inexistente."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro inesperado no servidor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    InitialLoadAcceptedResponse:
+      type: object
+      required:
+        - brandsEnqueued
+      properties:
+        brandsEnqueued:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Quantidade de mensagens aceitas na fila (uma por marca retornada pela FIPE).
+        correlationId:
+          type: string
+          description: Opcional; rastreio da operação de enfileiramento nos logs.
+
+    BrandResponse:
+      type: object
+      required:
+        - id
+        - fipeCode
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        fipeCode:
+          type: string
+          description: "Código da marca como Marca.codigo na API FIPE (GET /carros/marcas)."
+        name:
+          type: string
+          description: "Nome da marca como Marca.nome."
+
+    VehicleResponse:
+      type: object
+      required:
+        - id
+        - brandId
+        - fipeModelCode
+        - modelName
+        - createdAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identificador único do recurso; único endereçamento na API REST.
+        brandId:
+          type: integer
+          format: int64
+        fipeModelCode:
+          type: integer
+          format: int32
+          description: |
+            Código numérico do modelo na FIPE (`Modelo.codigo` em `GET …/marcas/{codigoMarca}/modelos`).
+        modelName:
+          type: string
+          description: "Nome do modelo (Modelo.nome); editável via PATCH."
+        notes:
+          type: string
+          nullable: true
+          description: Observações internas; opcional.
+        createdAt:
+          type: string
+          format: date-time
+
+    VehiclePatchRequest:
+      type: object
+      description: "Pelo menos um de modelName ou notes deve ser enviado."
+      properties:
+        modelName:
+          type: string
+          description: Novo nome de exibição do modelo; atualiza a linha existente.
+        notes:
+          type: string
+          nullable: true
+          description: Substituição de observações (ou null para limpar, se a implementação permitir).
+      anyOf:
+        - required: [modelName]
+        - required: [notes]
+
+    ErrorResponse:
+      type: object
+      description: Envelope simples de erro (a semântica HTTP vem do status).
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Mensagem legível.
+        details:
+          type: string
+          description: Detalhe opcional para operadores ou clientes.

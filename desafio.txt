@@ -1,0 +1,30 @@
+Teste Backend (Java):
+
+ Dúvidas e o link do github enviar por email;
+ Entrega: prazo de 5 dias;
+BackEnd:
+
+1. Criar um serviço REST na API-1 para acionar a ”carga inicial” dos dados de
+veículos.
+2. Implementar a lógica na API-1 para buscar as &quot;marcas&quot; no serviço da  FIPE
+(https://deividfortuna.github.io/fipe/).
+3. Configurar uma “Fila” para receber as &quot;marcas&quot; da API-1 e enviar uma por
+vez para a API-2 para processamento assíncrono.
+4. Implementar a lógica na API-2 para buscar os &quot;códigos&quot; e &quot;modelos&quot; dos
+veículos no serviço da FIPE com base nas &quot;marcas&quot; recebidas da fila.
+5. Implementar a lógica na API-2 para salvar no banco de dados “SQL” as
+informações de &quot;código&quot;, &quot;marca&quot; e &quot;modelo&quot; dos veículos encontrados no
+serviço da FIPE.
+6. Criar um serviço REST na API-1 para buscar as &quot;marcas&quot; armazenadas no
+banco de dados.
+7. Criar um serviço REST na API-1 para buscar os &quot;códigos&quot;, &quot;modelos&quot; e
+“observações” dos veículos por &quot;marca&quot; no banco de dados.
+8. Criar um serviço REST na API-1 para salvar os dados alterados do veículo,
+como: &quot;modelo&quot; e “observações” no banco de dados.
+
+Tecnologia: Java, Quarkus, etc.
+
+Obs.: importante aplicar os conceitos e boas práticas de desenvolvimento e
+engenharia de software, ex.: padrões REST, SOLID, DDD, TDD e Design
+Patterns, Contract First (Swagger), Clean Architecture, Clean Code, etc. Estes
+requisitos são importantes para avaliação.

@@ -1,0 +1,49 @@
+# Maven (todos os módulos: api-1, api-2, fipe-mock, etc.)
+**/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+.flattened-pom.xml
+
+# Quarkus / native
+**/build/
+*.jar.original
+*.so
+*.dylib
+*.dll
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+bin/
+nb-configuration.xml
+.vscode/
+
+# OS e editores
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+*.orig
+*.rej
+
+# Logs e dumps JVM
+*.log
+hs_err_pid*
+replay_pid*
+
+# Segredos / ambiente local (não commitar credenciais)
+.env
+.env.*
+!.env.example
+
+# Cobertura / relatórios locais
+jacoco.exec
+*.exec

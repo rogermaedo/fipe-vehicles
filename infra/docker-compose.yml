@@ -1,0 +1,52 @@
+# Local infrastructure: PostgreSQL + RabbitMQ for api-1 and api-2 (Quarkus + SmallRye).
+# Na raiz do repo: cd infra && docker compose up -d
+#
+# Ports:
+#   PostgreSQL: 5432
+#   RabbitMQ AMQP: 5672
+#   RabbitMQ Management UI: http://localhost:15672 (vehicle / vehicle)
+#
+# First-time DB: ./sql/*.sql runs in lexical order on empty postgres_data volume only.
+# To re-run 001 after data exists: docker compose down -v (wipes data) or psql -f sql/001_initial_schema.sql
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vehicle-postgres
+    environment:
+      POSTGRES_USER: vehicle
+      POSTGRES_PASSWORD: vehicle
+      POSTGRES_DB: vehicle
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vehicle -d vehicle"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: vehicle-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: vehicle
+      RABBITMQ_DEFAULT_PASS: vehicle
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
