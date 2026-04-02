@@ -18,7 +18,7 @@ A persistência dos **modelos por marca** (itens 4–5) é feita pela **api-2**,
 ## Contrato e documentação interativa
 
 - Especificação: `src/main/resources/META-INF/openapi.yaml`
-- Em **dev**, com a app a correr: [Swagger UI](http://localhost:8080/q/swagger-ui) e OpenAPI em `/q/openapi`
+- Em **dev**, com a app rodando: [Swagger UI](http://localhost:8080/q/swagger-ui) e OpenAPI em `/q/openapi`
 
 ## Pré-requisitos
 
@@ -33,7 +33,7 @@ Variáveis úteis (todas opcionais; existem defaults em `application.properties`
 | Variável | Descrição |
 |----------|-----------|
 | `JDBC_URL` | JDBC PostgreSQL (ex.: `jdbc:postgresql://localhost:5432/vehicle`) |
-| `DB_USER` / `DB_PASSWORD` | Credenciais da base |
+| `DB_USER` / `DB_PASSWORD` | Credenciais do banco |
 | `FIPE_API_BASE_URL` | URL base do cliente FIPE (ex.: `http://localhost:8090` para o mock; produção típica: `https://parallelum.com.br/fipe/api/v1`) |
 | `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USER` / `RABBITMQ_USERNAME`, `RABBITMQ_PASS` / `RABBITMQ_PASSWORD` | Broker AMQP |
 
@@ -41,9 +41,9 @@ Porta HTTP padrão: **8080**.
 
 ## Como executar (local)
 
-1. Subir infra: na raiz do repo, `cd infra && docker compose up -d`
+1. Subir infra: na raiz do repositório, `cd infra && docker compose up -d`
 2. (Se usar mock FIPE) Subir o **`fipe-mock`** e definir `FIPE_API_BASE_URL` como a URL do mock (ver README do `fipe-mock`)
-3. Subir a **api-2** antes ou em paralelo à api-1 se quiser que as mensagens sejam consumidas logo
+3. Subir a **api-2** antes ou em paralelo com a api-1 se quiser que as mensagens sejam consumidas logo
 4. Na pasta `api-1`:
 
 ```bash
@@ -59,7 +59,7 @@ Windows (PowerShell):
 ## Comportamento da carga inicial
 
 - Resposta **`202 Accepted`** com corpo `brandsEnqueued`: a parte síncrona (FIPE + enfileiramento) terminou.
-- **Não** garante que os veículos já estejam na base — isso depende da api-2. Consulte `GET /api/v1/brands` e os veículos por marca quando o processamento assíncrono tiver avançado.
+- **Não** garante que os veículos já estejam no banco — isso depende da api-2. Consulte `GET /api/v1/brands` e os veículos por marca quando o processamento assíncrono tiver avançado.
 
 ## Testes
 
@@ -69,6 +69,6 @@ Windows (PowerShell):
 
 O perfil `%test` usa H2 em memória e conector de mensagens in-memory; o cliente FIPE em testes de integração pode ser substituído por WireMock (ver `src/test/java/.../support/FipeWireMockResource.java`).
 
-## Boas práticas (alinhamento ao enunciado)
+## Boas práticas (alinhamento ao enunciado do desafio)
 
 REST, contrato **OpenAPI-first** (pacote `contract`), camadas de aplicação/infraestrutura, portas para FIPE e fila, testes automatizados — conforme referido no `desafio.txt`.

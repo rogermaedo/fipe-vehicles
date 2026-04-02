@@ -43,7 +43,7 @@ export FIPE_MOCK_PORT=8099   # Linux/macOS
 set FIPE_MOCK_PORT=8099      # Windows CMD
 ```
 
-## Ligar api-1 e api-2 ao mock
+## Conectar api-1 e api-2 ao mock
 
 Definir a **mesma** URL base em ambas (sem path `/carros/...` — isso vem do cliente):
 
@@ -60,7 +60,7 @@ Ordem recomendada ao desenvolver: **fipe-mock** → **infra** (Postgres + Rabbit
 - Navegador ou curl: `http://localhost:8090/carros/marcas`  
 - `http://localhost:8090/carros/marcas/59/modelos`
 
-## Empacotar e correr só com `java` (opcional)
+## Empacotar e executar só com `java` (opcional)
 
 ```bash
 mvn -q package
@@ -71,4 +71,4 @@ O `MANIFEST.MF` referencia `lib/*` **relativamente à pasta `target/`** (onde o 
 
 ## Nota sobre o desafio
 
-O enunciado (`desafio.txt`) exige integração com a FIPE; em avaliação ou produção usa-se a URL real quando está estável. O **fipe-mock** existe para **desenvolvimento e demonstração** quando o serviço externo falha, mantendo o contrato HTTP compatível com `fipeapi.json` para as operações usadas no projeto.
+O enunciado (`desafio.txt`) exige integração com a FIPE; em avaliação ou produção, use a URL real quando estiver estável. O **fipe-mock** existe para **desenvolvimento e demonstração** quando o serviço externo falha, mantendo o contrato HTTP compatível com `fipeapi.json` para as operações usadas no projeto.

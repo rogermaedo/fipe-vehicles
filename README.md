@@ -6,7 +6,7 @@ Monorepo **Java / Quarkus** com duas APIs e um mock HTTP da **FIPE**, alinhado a
 
 ## Arquitetura em alto nível
 
-No **GitHub**, o diagrama abaixo é desenhado automaticamente; na pré-visualização Markdown de algumas IDEs pode aparecer só como código.
+No **GitHub**, o diagrama abaixo é renderizado automaticamente; no preview de Markdown de algumas IDEs pode aparecer só como código.
 
 ```mermaid
 flowchart LR
@@ -112,14 +112,14 @@ Aguarde alguns segundos após o `initial-load` para a api-2 processar a fila ant
 
 ```bash
 docker compose down           # mantém volumes (dados no Postgres / estado Rabbit)
-docker compose down -v        # apaga volumes — na próxima subida o SQL inicial corre de novo
+docker compose down -v        # apaga volumes — na próxima subida o SQL inicial roda de novo
 ```
 
 Se também usar o compose **mínimo** em [`infra/docker-compose.yml`](infra/docker-compose.yml) (`docker compose up` dentro de `infra/`), **não rode os dois ao mesmo tempo** nas mesmas portas.
 
 ### Atalhos em `infra/`
 
-Os scripts [`infra/up-stack.ps1`](infra/up-stack.ps1) e [`infra/up-stack.sh`](infra/up-stack.sh) sobem a **mesma** stack a partir da raiz do repo.
+Os scripts [`infra/up-stack.ps1`](infra/up-stack.ps1) e [`infra/up-stack.sh`](infra/up-stack.sh) sobem a **mesma** stack a partir da raiz do repositório.
 
 ---
 
@@ -140,7 +140,7 @@ Na raiz (requer JDK 17+):
 ./mvnw -pl fipe-mock,api-1,api-2 -am verify
 ```
 
-Ou entre em cada módulo com `mvnw` e use `quarkus:dev` conforme os READMEs dos módulos.
+Ou acesse cada módulo com `mvnw` e use `quarkus:dev` conforme os READMEs dos módulos.
 
 ---
 

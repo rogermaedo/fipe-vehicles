@@ -1,12 +1,12 @@
 # API-2 — Consumo da fila, FIPE (modelos) e persistência
 
-A **api-2** **não expõe** a API REST do desafio para o utilizador final. O seu papel é **consumir mensagens** com dados de marca vindos da api-1, **chamar a FIPE** para obter **códigos e nomes de modelos** por marca, e **gravar** marca e veículos no **mesmo PostgreSQL** usado pela api-1.
+A **api-2** **não expõe** a API REST do desafio para o usuário final. Seu papel é **consumir mensagens** com dados de marca vindos da api-1, **chamar a FIPE** para obter **códigos e nomes de modelos** por marca, e **gravar** marca e veículos no **mesmo PostgreSQL** usado pela api-1.
 
 ## Relação com o desafio (`desafio.txt`)
 
 | Item | O que a api-2 faz |
 |------|-------------------|
-| **3** | Consome a fila (canal `brands-in`), **uma mensagem de cada vez** (`@Blocking`), em fila dedicada ligada ao exchange fanout `vehicle-brands`. |
+| **3** | Consome a fila (canal `brands-in`), **uma mensagem de cada vez** (`@Blocking`), em fila dedicada vinculada ao exchange fanout `vehicle-brands`. |
 | **4** | Para cada mensagem, chama a FIPE: `GET /carros/marcas/{codigoMarca}/modelos`. |
 | **5** | Persiste **marca** (se necessário) e **veículos** com `fipeModelCode` (código do modelo na FIPE), `modelName` e associação à marca; evita duplicar o mesmo par marca + código de modelo. |
 
@@ -53,9 +53,9 @@ Confirme nos logs linhas do tipo: conexão RabbitMQ e *receiver* à fila `vehicl
 
 ## Fluxo típico de validação
 
-1. api-2 a correr  
+1. api-2 rodando  
 2. api-1: `POST /api/v1/initial-load`  
-3. api-2 processa mensagens e preenche a base  
+3. api-2 processa mensagens e preenche o banco  
 4. api-1: `GET /api/v1/brands` e `GET /api/v1/brands/{id}/vehicles` para ver o resultado
 
 ## Testes
@@ -68,4 +68,4 @@ O perfil `%test` usa H2 em memória e canal de entrada **in-memory** (requer a d
 
 ## Boas práticas
 
-Processamento assíncrono isolado, REST Client para FIPE, transações ao persistir, separação entre consumidor de mensagens (`BrandIngestConsumer`) e caso de uso (`BrandIngestProcessor`), alinhado ao enunciado (SOLID, Clean Architecture, etc.).
+Processamento assíncrono isolado, REST Client para FIPE, transações ao persistir, separação entre consumidor de mensagens (`BrandIngestConsumer`) e caso de uso (`BrandIngestProcessor`), alinhado ao enunciado do desafio (SOLID, Clean Architecture, etc.).

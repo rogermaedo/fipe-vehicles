@@ -70,7 +70,7 @@ cd ..
 docker compose up -d --build
 ```
 
-Ou execute **`up-stack.ps1`** / **`up-stack.sh`** nesta pasta — eles mudam para a raiz e rodam o mesmo comando.
+Ou execute **`up-stack.ps1`** / **`up-stack.sh`** nesta pasta — eles vão para a raiz e executam o mesmo comando.
 
 Instruções completas, diagrama de arquitetura e tabela de portas: [`README.md`](../README.md).
 
