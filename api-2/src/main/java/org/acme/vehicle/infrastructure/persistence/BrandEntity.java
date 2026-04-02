@@ -30,4 +30,17 @@ public class BrandEntity extends PanacheEntityBase {
     public static Optional<BrandEntity> findByFipeCode(String fipeCode) {
         return find("fipeCode", fipeCode).firstResultOptional();
     }
+
+    @Override
+    public String toString() {
+        return "BrandEntity{id="
+                + id
+                + ", fipeCode='"
+                + fipeCode
+                + "', name='"
+                + name
+                + "', createdAt="
+                + createdAt
+                + "}";
+    }
 }

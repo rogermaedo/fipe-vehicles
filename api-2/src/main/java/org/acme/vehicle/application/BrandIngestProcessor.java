@@ -38,6 +38,7 @@ public class BrandIngestProcessor {
                                     b.name = msg.name();
                                     b.createdAt = Instant.now();
                                     b.persist();
+                                    LOG.infof("Registro inserido no banco (brand): %s", b);
                                     return b;
                                 });
         if (msg.name() != null && !msg.name().equals(brand.name)) {
@@ -70,6 +71,7 @@ public class BrandIngestProcessor {
             v.modelName = modelo.getNome() != null ? modelo.getNome() : "";
             v.createdAt = Instant.now();
             v.persist();
+            LOG.infof("Registro inserido no banco (vehicle): %s", v);
         }
     }
 }

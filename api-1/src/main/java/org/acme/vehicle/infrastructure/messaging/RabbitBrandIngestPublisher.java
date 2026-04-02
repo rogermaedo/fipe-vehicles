@@ -9,10 +9,13 @@ import org.acme.vehicle.application.exception.BrandIngestPublishException;
 import org.acme.vehicle.application.port.BrandIngestPublisher;
 import org.acme.vehicle.domain.model.FipeBrand;
 import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.jboss.logging.Logger;
 import io.smallrye.reactive.messaging.MutinyEmitter;
 
 @ApplicationScoped
 public class RabbitBrandIngestPublisher implements BrandIngestPublisher {
+
+    private static final Logger LOG = Logger.getLogger(RabbitBrandIngestPublisher.class);
 
     private final MutinyEmitter<String> emitter;
     private final ObjectMapper objectMapper;
@@ -27,8 +30,10 @@ public class RabbitBrandIngestPublisher implements BrandIngestPublisher {
     public void publishAll(List<FipeBrand> brands) {
         for (FipeBrand brand : brands) {
             try {
-                String json = objectMapper.writeValueAsString(new BrandIngestMessage(brand.fipeCode(), brand.name()));
+                BrandIngestMessage payload = new BrandIngestMessage(brand.fipeCode(), brand.name());
+                String json = objectMapper.writeValueAsString(payload);
                 emitter.sendAndAwait(json);
+                LOG.infof("Mensagem enfileirada na fila (brands-out / exchange vehicle-brands): %s", payload);
             } catch (JsonProcessingException e) {
                 throw new BrandIngestPublishException("Falha ao serializar mensagem para a fila.", e);
             } catch (RuntimeException e) {

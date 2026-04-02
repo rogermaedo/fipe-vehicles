@@ -68,7 +68,10 @@ flowchart LR
 3. A api-2 consome da fila **`vehicle-brands-api2`**, busca **modelos** na FIPE por código de marca e grava linhas em **`vehicle`** (e **`brand`** quando necessário).  
 4. Consultas **`GET /api/v1/brands`**, **`GET /api/v1/brands/{brandId}/vehicles`**, **`PATCH /api/v1/vehicles/{id}`** são atendidas pela api-1 sobre o banco já populado.
 
-Identidade na API REST: o veículo é sempre endereçado pelo **`id`** interno; o código numérico de modelo na FIPE é o campo **`fipeModelCode`** (não substitui `id` na URL).
+### Regras do fluxo:
+1. Se o registro já existir em vehicle, os dados dele serão atualizados (caso existam alterações). o Campo note não será atualizado e as observações inseridas anteriormente serão mantidas.
+2. Rodar o initial-load novamente não duplicará os registros, pois a atualização é realizada com base no código da API externa **`fipeModelCode`**.
+3. Identidade na API REST: o veículo é sempre endereçado pelo **`id`** interno; o código numérico de modelo na FIPE é o campo **`fipeModelCode`** (não substitui `id` na URL).
 
 ---
 

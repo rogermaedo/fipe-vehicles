@@ -39,4 +39,22 @@ public class VehicleEntity extends PanacheEntityBase {
     public static boolean existsByBrandAndFipeModel(Long brandId, int fipeModelCode) {
         return count("brand.id = ?1 AND fipeModelCode = ?2", brandId, fipeModelCode) > 0;
     }
+
+    @Override
+    public String toString() {
+        Long brandId = brand != null ? brand.id : null;
+        return "VehicleEntity{id="
+                + id
+                + ", brandId="
+                + brandId
+                + ", fipeModelCode="
+                + fipeModelCode
+                + ", modelName='"
+                + modelName
+                + "', notes='"
+                + notes
+                + "', createdAt="
+                + createdAt
+                + "}";
+    }
 }

@@ -27,6 +27,7 @@ public class BrandIngestConsumer {
     public void consume(String json) {
         try {
             BrandIngestMessage msg = objectMapper.readValue(json, BrandIngestMessage.class);
+            LOG.infof("Mensagem consumida da fila (brands-in / queue vehicle-brands-api2): %s", msg);
             brandIngestProcessor.process(msg);
         } catch (Exception e) {
             LOG.errorf(e, "Erro ao processar mensagem de marca: %s", json);
